@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIDI Notes Player</title>
+  <meta name="description" content="Play sequences of MIDI notes in your browser. Supports MIDI numbers and note name notation with multiple instruments." />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div class="grain-overlay"></div>
+
+  <div class="app">
+    <header class="header">
+      <div class="logo-mark">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect x="2" y="8" width="4" height="18" rx="1" fill="currentColor" opacity="0.4"/>
+          <rect x="8" y="4" width="4" height="22" rx="1" fill="currentColor" opacity="0.6"/>
+          <rect x="14" y="2" width="4" height="26" rx="1" fill="currentColor" opacity="0.8"/>
+          <rect x="20" y="6" width="4" height="20" rx="1" fill="currentColor" opacity="0.6"/>
+          <rect x="26" y="10" width="4" height="14" rx="1" fill="currentColor" opacity="0.4"/>
+        </svg>
+      </div>
+      <h1>MIDI Notes Player</h1>
+      <p class="subtitle">Type notes. Hear music. Any format, any separator.</p>
+    </header>
+
+    <main class="main">
+      <!-- Instrument Selector -->
+      <section class="control-section">
+        <label class="control-label" for="instrument-select">
+          <span class="label-icon">&#9835;</span>
+          Instrument
+        </label>
+        <div class="select-wrapper">
+          <select id="instrument-select"></select>
+          <span class="select-arrow">&#9662;</span>
+        </div>
+      </section>
+
+      <!-- Notes Input -->
+      <section class="input-section">
+        <div class="input-header">
+          <label class="control-label" for="notes-input">
+            <span class="label-icon">&#9833;</span>
+            Notes
+          </label>
+          <div class="input-actions">
+            <button id="load-fur-elise" class="btn btn-ghost" title="Load Für Elise">
+              Für Elise
+            </button>
+            <button id="clear-btn" class="btn btn-ghost" title="Clear notes">
+              Clear
+            </button>
+          </div>
+        </div>
+        <textarea
+          id="notes-input"
+          placeholder="Enter MIDI numbers (0-127) or note names (C4, Eb5, F#3)&#10;Use any separator: commas, spaces, dashes, pipes...&#10;&#10;Example: 60, 64, 67  or  C4 E4 G4"
+          spellcheck="false"
+        ></textarea>
+        <div id="notes-preview" class="notes-preview"></div>
+      </section>
+
+      <!-- Playback Controls -->
+      <section class="playback-section">
+        <div class="tempo-control">
+          <label class="control-label" for="tempo-slider">
+            <span class="label-icon">&#9201;</span>
+            Tempo
+            <span id="tempo-value" class="tempo-value">120 BPM</span>
+          </label>
+          <input type="range" id="tempo-slider" min="40" max="300" value="120" />
+        </div>
+
+        <div class="duration-control">
+          <label class="control-label" for="duration-slider">
+            <span class="label-icon">&#9834;</span>
+            Note Duration
+            <span id="duration-value" class="tempo-value">0.3s</span>
+          </label>
+          <input type="range" id="duration-slider" min="0.05" max="2" value="0.3" step="0.05" />
+        </div>
+
+        <div class="transport-controls">
+          <button id="play-btn" class="btn btn-play" title="Play">
+            <svg class="icon-play" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <polygon points="4,2 18,10 4,18" />
+            </svg>
+            <svg class="icon-stop" width="20" height="20" viewBox="0 0 20 20" fill="currentColor" style="display:none">
+              <rect x="3" y="3" width="14" height="14" rx="2" />
+            </svg>
+            <span class="play-label">Play</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Now Playing Indicator -->
+      <section id="now-playing" class="now-playing hidden">
+        <div class="now-playing-bar">
+          <div id="progress-bar" class="progress-fill"></div>
+        </div>
+        <div id="current-note-display" class="current-note"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Supports MIDI numbers <code>0–127</code> and note names like <code>C4</code>, <code>Eb5</code>, <code>F#3</code>.
+        Use <em>any</em> separator between notes.
+      </p>
+      <p class="footer-link">
+        <a href="https://github.com/mayerwin/MIDI-Notes-Player" target="_blank" rel="noopener">GitHub</a>
+        &middot; MIT License
+      </p>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
