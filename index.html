@@ -60,7 +60,7 @@
         </div>
         <textarea
           id="notes-input"
-          placeholder="Enter MIDI numbers (0-127) or note names (C4, Eb5, F#3)&#10;Use any separator: commas, spaces, dashes, pipes...&#10;&#10;Example: 60, 64, 67  or  C4 E4 G4"
+          placeholder="Enter MIDI numbers (0-127), note names (C4, Eb5, F#3), or solfège (do, ré, sol#, solb3)&#10;Octave is optional (defaults to 4). Use any separator.&#10;&#10;Example: 60, 64, 67  or  C4 E4 G4  or  do mi sol"
           spellcheck="false"
         ></textarea>
         <div id="notes-preview" class="notes-preview"></div>
@@ -110,8 +110,9 @@
 
     <footer class="footer">
       <p>
-        Supports MIDI numbers <code>0–127</code> and note names like <code>C4</code>, <code>Eb5</code>, <code>F#3</code>.
-        Use <em>any</em> separator between notes.
+        Supports MIDI numbers <code>0–127</code>, note names like <code>C4</code>, <code>Eb5</code>, <code>F#3</code>,
+        and solfège like <code>do</code>, <code>ré</code>, <code>solb3</code>.
+        Octave optional (defaults to 4). Use <em>any</em> separator.
       </p>
       <p class="footer-link">
         <a href="https://github.com/mayerwin/MIDI-Notes-Player" target="_blank" rel="noopener">GitHub</a>

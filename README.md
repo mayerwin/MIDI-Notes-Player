@@ -8,7 +8,7 @@ A beautiful web app that plays sequences of MIDI notes directly in your browser.
 
 ## Features
 
-- **Flexible input** — Enter MIDI numbers (`0`–`127`) or note names (`C4`, `Eb5`, `F#3`). Use any separator: commas, spaces, pipes, dashes, semicolons, or anything else.
+- **Flexible input** — Enter MIDI numbers (`0`–`127`), note names (`C4`, `Eb5`, `F#3`), or solfège (`do`, `ré`, `sol#`, `solb3`). Octave is optional and defaults to 4. Use any separator: commas, spaces, pipes, dashes, semicolons, or anything else.
 - **50+ instruments** — Grand Piano (default), strings, brass, woodwinds, guitars, and more. Powered by SoundFont samples.
 - **Real-time validation** — Each note is parsed and displayed as a token. Invalid notes are highlighted in red.
 - **Adjustable tempo & duration** — Control playback speed (40–300 BPM) and note duration independently.
@@ -22,7 +22,11 @@ A beautiful web app that plays sequences of MIDI notes directly in your browser.
 |---|---|
 | MIDI numbers | `60, 64, 67, 72` |
 | Note names | `C4 E4 G4 C5` |
-| Mixed | `C4, 64, G4, 72` |
+| Note names (no octave) | `C E G` (defaults to octave 4) |
+| Solfège | `do mi sol` |
+| Solfège with octave | `do4 mi4 sol4` |
+| Solfège with accidentals | `solb3`, `sol#4`, `sold4` (`d` = dièse) |
+| Mixed | `C4, 64, sol, 72` |
 | Any separator | `60\|64\|67` or `60-64-67` or `60;64;67` |
 | Accidentals | `Eb5`, `F#3`, `Db4`, `C##4`, `Bbb3` |
 
