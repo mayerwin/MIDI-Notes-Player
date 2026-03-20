@@ -78,9 +78,13 @@
           placeholder="Enter MIDI numbers (0-127), note names (C4, Eb5, F#3), or solfège (do, ré, sol#, solb3)&#10;Octave is optional (defaults to 4). Use any separator.&#10;&#10;Example: 60, 64, 67  or  C4 E4 G4  or  do mi sol"
           spellcheck="false"
         ></textarea>
-        <button id="toggle-preview-btn" class="btn-toggle-preview">
-          <span class="toggle-arrow">&#9662;</span> Preview
-        </button>
+        <div class="preview-divider">
+          <div class="preview-divider-line"></div>
+          <button id="toggle-preview-btn" class="btn-toggle-preview">
+            <span class="toggle-arrow">&#9662;</span> Resolved
+          </button>
+          <div class="preview-divider-line"></div>
+        </div>
         <div id="notes-preview" class="notes-preview"></div>
       </section>
 
