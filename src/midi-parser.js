@@ -104,44 +104,103 @@ export function midiToNoteName(midi) {
 /**
  * Tokenize and parse an input string into an array of note tokens.
  *
- * Each token is: { raw, midi, name, valid }
+ * Each token is: { raw, midi, name, valid, start, end }
  * - raw: the original text token
  * - midi: the resolved MIDI number (or null if invalid)
  * - name: the human-readable note name (or null)
  * - valid: boolean
+ * - start: start index in the original input string
+ * - end: end index (exclusive) in the original input string
  */
 export function parseNotes(input) {
   if (!input || !input.trim()) return []
 
-  // Split on anything that isn't: a letter (including accented é), a digit, a # sign, or a minus (for octave -1)
-  const tokens = input
-    .split(/[^\p{L}0-9#\-]+/u)
-    .map(t => t.trim())
-    .filter(t => t.length > 0)
+  // Match tokens with their positions using regex
+  const tokenRegex = /[\p{L}0-9#\-]+/gu
+  const tokens = []
+  let match
+  while ((match = tokenRegex.exec(input)) !== null) {
+    const raw = match[0].trim()
+    if (raw.length > 0) {
+      tokens.push({ raw, start: match.index, end: match.index + match[0].length })
+    }
+  }
 
-  return tokens.map(raw => {
+  return tokens.map(({ raw, start, end }) => {
     // First, try as a plain MIDI number
     if (/^\d+$/.test(raw)) {
       const num = parseInt(raw, 10)
       if (num >= 0 && num <= 127) {
-        return { raw, midi: num, name: midiToNoteName(num), valid: true }
+        return { raw, midi: num, name: midiToNoteName(num), valid: true, start, end }
       }
-      return { raw, midi: null, name: null, valid: false }
+      return { raw, midi: null, name: null, valid: false, start, end }
     }
 
     // Try as solfège (do, ré, sol#, solb3, etc.)
     const solfegeMidi = solfegeToMidi(raw)
     if (solfegeMidi !== null) {
-      return { raw, midi: solfegeMidi, name: midiToNoteName(solfegeMidi), valid: true }
+      return { raw, midi: solfegeMidi, name: midiToNoteName(solfegeMidi), valid: true, start, end }
     }
 
     // Then, try as a standard note name (C4, Eb5, G, etc.)
     const midi = noteNameToMidi(raw)
     if (midi !== null) {
-      return { raw, midi, name: midiToNoteName(midi), valid: true }
+      return { raw, midi, name: midiToNoteName(midi), valid: true, start, end }
     }
 
     // Invalid
-    return { raw, midi: null, name: null, valid: false }
+    return { raw, midi: null, name: null, valid: false, start, end }
   })
+}
+
+// ─── Conversion helpers ─────────────────────────────────────
+
+const NOTE_NAMES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+const NOTE_NAMES_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+
+const SOLFEGE_NAMES_SHARP = ['Do', 'Do#', 'Ré', 'Ré#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si']
+const SOLFEGE_NAMES_FLAT  = ['Do', 'Réb', 'Ré', 'Mib', 'Mi', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Si']
+
+/**
+ * Convert a MIDI number to a note name with the accidental style matching the original input.
+ * Uses sharp for sharp inputs, flat for flat inputs, and the NOTE_NAMES default otherwise.
+ */
+function midiToNoteNameStyled(midi, originalRaw) {
+  if (midi < 0 || midi > 127) return null
+  const octave = Math.floor(midi / 12) - 1
+  const semitone = midi % 12
+  // Check if original used flat (b) or sharp (#)
+  const useFlat = originalRaw && /b/i.test(originalRaw) && !/^[A-Ga-g]/.test(originalRaw) === false
+  const hasFlat = originalRaw && originalRaw.includes('b')
+  const note = hasFlat ? NOTE_NAMES_FLAT[semitone] : NOTE_NAMES_SHARP[semitone]
+  return `${note}${octave}`
+}
+
+/**
+ * Convert MIDI number to note name in C#/Db notation.
+ * @param {number} midi
+ * @param {boolean} compact - if true, omit octave 4
+ */
+export function midiToNoteNotation(midi, compact = false) {
+  if (midi < 0 || midi > 127) return String(midi)
+  const octave = Math.floor(midi / 12) - 1
+  const note = NOTE_NAMES[midi % 12]
+  if (compact && octave === 4) return note
+  return `${note}${octave}`
+}
+
+/**
+ * Convert MIDI number to solfège notation.
+ * @param {number} midi
+ * @param {boolean} compact - if true, omit octave 4
+ */
+export function midiToSolfegeNotation(midi, compact = false) {
+  if (midi < 0 || midi > 127) return String(midi)
+  const octave = Math.floor(midi / 12) - 1
+  const semitone = midi % 12
+  // Use the same accidental preference as the default NOTE_NAMES mapping
+  const defaultNote = NOTE_NAMES[semitone]
+  const solfege = defaultNote.includes('b') ? SOLFEGE_NAMES_FLAT[semitone] : SOLFEGE_NAMES_SHARP[semitone]
+  if (compact && octave === 4) return solfege
+  return `${solfege}${octave}`
 }

@@ -56,6 +56,21 @@
             <button id="clear-btn" class="btn btn-ghost" title="Clear notes">
               Clear
             </button>
+            <div class="convert-wrapper">
+              <button id="convert-btn" class="btn btn-ghost" title="Convert notation">
+                Convert &#9662;
+              </button>
+              <div id="convert-menu" class="convert-menu hidden">
+                <button data-format="midi">MIDI Numbers</button>
+                <button data-format="note">Note Names (C4, Eb5)</button>
+                <button data-format="note-compact">Note Names compact (C, Eb)</button>
+                <button data-format="solfege">Solfège (Do4, Sol#4)</button>
+                <button data-format="solfege-compact">Solfège compact (Do, Sol#)</button>
+              </div>
+            </div>
+            <button id="copy-btn" class="btn btn-ghost" title="Copy to clipboard">
+              Copy
+            </button>
           </div>
         </div>
         <textarea
@@ -74,7 +89,7 @@
             Tempo
             <span id="tempo-value" class="tempo-value">120 BPM</span>
           </label>
-          <input type="range" id="tempo-slider" min="40" max="300" value="120" />
+          <input type="range" id="tempo-slider" min="40" max="500" value="120" />
         </div>
 
         <div class="duration-control">
@@ -86,6 +101,15 @@
           <input type="range" id="duration-slider" min="0.05" max="2" value="0.3" step="0.05" />
         </div>
 
+        <div class="duration-control">
+          <label class="control-label" for="spacing-slider">
+            <span class="label-icon">&#8943;</span>
+            Note Spacing
+            <span id="spacing-value" class="tempo-value">0.00s</span>
+          </label>
+          <input type="range" id="spacing-slider" min="0" max="1" value="0" step="0.01" />
+        </div>
+
         <div class="transport-controls">
           <button id="play-btn" class="btn btn-play" title="Play">
             <svg class="icon-play" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
@@ -95,6 +119,13 @@
               <rect x="3" y="3" width="14" height="14" rx="2" />
             </svg>
             <span class="play-label">Play</span>
+          </button>
+          <button id="pause-btn" class="btn btn-pause hidden" title="Pause">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <rect x="4" y="3" width="4" height="14" rx="1" />
+              <rect x="12" y="3" width="4" height="14" rx="1" />
+            </svg>
+            <span>Pause</span>
           </button>
         </div>
       </section>

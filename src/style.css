@@ -383,6 +383,7 @@ input[type="range"]::-moz-range-thumb {
 .transport-controls {
   display: flex;
   justify-content: center;
+  gap: 0.75rem;
   padding-top: 0.5rem;
 }
 
@@ -417,6 +418,74 @@ input[type="range"]::-moz-range-thumb {
 
 .play-label {
   font-family: var(--font-body);
+}
+
+/* Pause button */
+.btn-pause {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 2rem;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  letter-spacing: 0.04em;
+  transition: all 0.25s var(--ease-out);
+}
+
+.btn-pause:hover {
+  border-color: var(--accent-dim);
+  background: var(--bg-surface);
+}
+
+.btn-pause.hidden {
+  display: none;
+}
+
+/* Convert dropdown */
+.convert-wrapper {
+  position: relative;
+}
+
+.convert-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.3rem;
+  z-index: 100;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.convert-menu.hidden {
+  display: none;
+}
+
+.convert-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.convert-menu button:hover {
+  background: var(--bg-surface);
+  color: var(--accent);
 }
 
 /* Now playing section */

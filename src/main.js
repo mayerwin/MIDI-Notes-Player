@@ -1,7 +1,7 @@
 /**
  * MIDI Notes Player — Main Application
  */
-import { parseNotes, midiToNoteName } from './midi-parser.js'
+import { parseNotes, midiToNoteName, midiToNoteNotation, midiToSolfegeNotation } from './midi-parser.js'
 import { INSTRUMENTS, loadInstrument, playNote, stopAll, getAudioContext } from './player.js'
 
 // Für Elise opening theme (MIDI numbers)
@@ -12,21 +12,28 @@ const instrumentSelect = document.getElementById('instrument-select')
 const notesInput = document.getElementById('notes-input')
 const notesPreview = document.getElementById('notes-preview')
 const playBtn = document.getElementById('play-btn')
+const pauseBtn = document.getElementById('pause-btn')
 const playIcon = playBtn.querySelector('.icon-play')
 const stopIcon = playBtn.querySelector('.icon-stop')
 const playLabel = playBtn.querySelector('.play-label')
 const loadFurEliseBtn = document.getElementById('load-fur-elise')
 const clearBtn = document.getElementById('clear-btn')
+const convertBtn = document.getElementById('convert-btn')
+const convertMenu = document.getElementById('convert-menu')
+const copyBtn = document.getElementById('copy-btn')
 const tempoSlider = document.getElementById('tempo-slider')
 const tempoValue = document.getElementById('tempo-value')
 const durationSlider = document.getElementById('duration-slider')
 const durationValue = document.getElementById('duration-value')
+const spacingSlider = document.getElementById('spacing-slider')
+const spacingValue = document.getElementById('spacing-value')
 const nowPlaying = document.getElementById('now-playing')
 const progressBar = document.getElementById('progress-bar')
 const currentNoteDisplay = document.getElementById('current-note-display')
 
 // State
 let isPlaying = false
+let isPaused = false
 let playbackTimeout = null
 let currentTokens = []
 let instrumentLoaded = false
@@ -119,9 +126,26 @@ function getNoteDuration() {
   return parseFloat(durationSlider.value)
 }
 
+function getNoteSpacing() {
+  return parseFloat(spacingSlider.value) * 1000 // convert to ms
+}
+
+// Playback state for pause/resume
+let playbackNoteIndex = 0
+let playbackValidTokens = []
+let playbackValidIndices = []
+
 async function startPlayback() {
-  if (isPlaying) {
+  if (isPlaying && !isPaused) {
     stopPlayback()
+    return
+  }
+
+  // Resume from pause
+  if (isPaused) {
+    isPaused = false
+    pauseBtn.querySelector('span').textContent = 'Pause'
+    playNext()
     return
   }
 
@@ -135,50 +159,72 @@ async function startPlayback() {
   if (!instrumentLoaded) return
 
   isPlaying = true
+  isPaused = false
   setPlayingUI(true)
   nowPlaying.classList.remove('hidden')
 
-  const interval = getTempoMs()
-  const totalNotes = validTokens.length
-  let noteIndex = 0
+  playbackValidTokens = validTokens
+  playbackNoteIndex = 0
 
   // Map valid tokens to their original indices for highlighting
-  const validIndices = currentTokens
+  playbackValidIndices = currentTokens
     .map((t, i) => t.valid ? i : -1)
     .filter(i => i !== -1)
-
-  function playNext() {
-    if (!isPlaying || noteIndex >= totalNotes) {
-      stopPlayback()
-      return
-    }
-
-    const token = validTokens[noteIndex]
-    const originalIndex = validIndices[noteIndex]
-
-    // Highlight current note
-    highlightToken(originalIndex)
-
-    // Update progress
-    progressBar.style.width = `${((noteIndex + 1) / totalNotes) * 100}%`
-    currentNoteDisplay.textContent = `${token.name}  (MIDI ${token.midi})`
-
-    // Play the note
-    playNote(token.midi, getNoteDuration())
-
-    noteIndex++
-    playbackTimeout = setTimeout(playNext, interval)
-  }
 
   playNext()
 }
 
+function playNext() {
+  if (!isPlaying || isPaused || playbackNoteIndex >= playbackValidTokens.length) {
+    if (playbackNoteIndex >= playbackValidTokens.length) {
+      stopPlayback()
+    }
+    return
+  }
+
+  const token = playbackValidTokens[playbackNoteIndex]
+  const originalIndex = playbackValidIndices[playbackNoteIndex]
+  const totalNotes = playbackValidTokens.length
+
+  // Highlight current note in preview
+  highlightToken(originalIndex)
+
+  // Highlight current note in textarea
+  highlightTextareaToken(currentTokens[originalIndex])
+
+  // Update progress
+  progressBar.style.width = `${((playbackNoteIndex + 1) / totalNotes) * 100}%`
+  currentNoteDisplay.textContent = `${token.name}  (MIDI ${token.midi})`
+
+  // Play the note
+  playNote(token.midi, getNoteDuration())
+
+  playbackNoteIndex++
+  const interval = getTempoMs() + getNoteSpacing()
+  playbackTimeout = setTimeout(playNext, interval)
+}
+
+function pausePlayback() {
+  if (!isPlaying) return
+  isPaused = !isPaused
+  if (isPaused) {
+    clearTimeout(playbackTimeout)
+    stopAll()
+    pauseBtn.querySelector('span').textContent = 'Resume'
+  } else {
+    pauseBtn.querySelector('span').textContent = 'Pause'
+    playNext()
+  }
+}
+
 function stopPlayback() {
   isPlaying = false
+  isPaused = false
   clearTimeout(playbackTimeout)
   stopAll()
   setPlayingUI(false)
   clearHighlights()
+  clearTextareaHighlight()
 
   // Reset progress after a short delay
   setTimeout(() => {
@@ -196,11 +242,14 @@ function setPlayingUI(playing) {
     playIcon.style.display = 'none'
     stopIcon.style.display = 'block'
     playLabel.textContent = 'Stop'
+    pauseBtn.classList.remove('hidden')
   } else {
     playBtn.classList.remove('playing')
     playIcon.style.display = 'block'
     stopIcon.style.display = 'none'
     playLabel.textContent = 'Play'
+    pauseBtn.classList.add('hidden')
+    pauseBtn.querySelector('span').textContent = 'Pause'
   }
 }
 
@@ -220,7 +269,73 @@ function clearHighlights() {
   })
 }
 
-// ─── Tempo & Duration display ──────────────────────────────
+function highlightTextareaToken(token) {
+  if (!token || token.start === undefined) return
+  notesInput.focus()
+  notesInput.setSelectionRange(token.start, token.end)
+}
+
+function clearTextareaHighlight() {
+  // Clear selection by collapsing to end
+  const len = notesInput.value.length
+  notesInput.setSelectionRange(len, len)
+}
+
+// ─── Convert ────────────────────────────────────────────────
+
+function convertNotes(format) {
+  const tokens = parseNotes(notesInput.value)
+  const validTokens = tokens.filter(t => t.valid)
+  if (validTokens.length === 0) return
+
+  let converted
+  switch (format) {
+    case 'midi':
+      converted = validTokens.map(t => String(t.midi))
+      break
+    case 'note':
+      converted = validTokens.map(t => midiToNoteNotation(t.midi, false))
+      break
+    case 'note-compact':
+      converted = validTokens.map(t => midiToNoteNotation(t.midi, true))
+      break
+    case 'solfege':
+      converted = validTokens.map(t => midiToSolfegeNotation(t.midi, false))
+      break
+    case 'solfege-compact':
+      converted = validTokens.map(t => midiToSolfegeNotation(t.midi, true))
+      break
+    default:
+      return
+  }
+
+  // Detect original separator style
+  const input = notesInput.value
+  let separator = ', '
+  if (/,\s/.test(input)) separator = ', '
+  else if (/\s/.test(input) && !input.includes(',')) separator = ' '
+  else if (input.includes('|')) separator = ' | '
+
+  notesInput.value = converted.join(separator)
+  updatePreview()
+}
+
+// ─── Copy ───────────────────────────────────────────────────
+
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(notesInput.value)
+    const originalText = copyBtn.textContent
+    copyBtn.textContent = 'Copied!'
+    setTimeout(() => { copyBtn.textContent = originalText }, 1500)
+  } catch {
+    // Fallback
+    notesInput.select()
+    document.execCommand('copy')
+  }
+}
+
+// ─── Tempo, Duration & Spacing display ──────────────────────
 
 function updateTempoDisplay() {
   tempoValue.textContent = `${tempoSlider.value} BPM`
@@ -230,11 +345,16 @@ function updateDurationDisplay() {
   durationValue.textContent = `${parseFloat(durationSlider.value).toFixed(2)}s`
 }
 
+function updateSpacingDisplay() {
+  spacingValue.textContent = `${parseFloat(spacingSlider.value).toFixed(2)}s`
+}
+
 // ─── Event Listeners ───────────────────────────────────────
 
 instrumentSelect.addEventListener('change', handleInstrumentChange)
 notesInput.addEventListener('input', schedulePreviewUpdate)
 playBtn.addEventListener('click', startPlayback)
+pauseBtn.addEventListener('click', pausePlayback)
 
 loadFurEliseBtn.addEventListener('click', () => {
   notesInput.value = FUR_ELISE
@@ -247,8 +367,30 @@ clearBtn.addEventListener('click', () => {
   if (isPlaying) stopPlayback()
 })
 
+// Convert button & menu
+convertBtn.addEventListener('click', (e) => {
+  e.stopPropagation()
+  convertMenu.classList.toggle('hidden')
+})
+
+convertMenu.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-format]')
+  if (btn) {
+    convertNotes(btn.dataset.format)
+    convertMenu.classList.add('hidden')
+  }
+})
+
+// Close convert menu on outside click
+document.addEventListener('click', () => {
+  convertMenu.classList.add('hidden')
+})
+
+copyBtn.addEventListener('click', copyToClipboard)
+
 tempoSlider.addEventListener('input', updateTempoDisplay)
 durationSlider.addEventListener('input', updateDurationDisplay)
+spacingSlider.addEventListener('input', updateSpacingDisplay)
 
 // Keyboard shortcut: Space to play/stop (when not in textarea)
 document.addEventListener('keydown', (e) => {
@@ -267,6 +409,7 @@ function init() {
   populateInstruments()
   updateTempoDisplay()
   updateDurationDisplay()
+  updateSpacingDisplay()
 
   // Pre-load default instrument on first interaction
   const loadOnInteraction = async () => {
