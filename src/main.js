@@ -2,7 +2,7 @@
  * MIDI Notes Player — Main Application
  */
 import { parseNotes, midiToNoteName, midiToNoteNotation, midiToSolfegeNotation } from './midi-parser.js'
-import { INSTRUMENTS, loadInstrument, playNote, stopAll, getAudioContext } from './player.js'
+import { INSTRUMENTS, loadInstrument, playNote, stopAll, getAudioContext, ensureAudioReady } from './player.js'
 
 // Für Elise opening theme (MIDI numbers)
 const FUR_ELISE = '76, 75, 76, 75, 76, 71, 74, 72, 69, 60, 64, 69, 71, 64, 68, 71, 72, 64, 76, 75, 76, 75, 76, 71, 74, 72, 69, 60, 64, 69, 71, 64, 72, 71, 69'
@@ -166,7 +166,8 @@ async function startPlayback() {
   }
   if (tokensToPlay.length === 0) return
 
-  // Ensure instrument is loaded
+  // Ensure audio context is running and instrument is loaded
+  await ensureAudioReady()
   if (!instrumentLoaded && !instrumentLoading) {
     await handleInstrumentChange()
   }

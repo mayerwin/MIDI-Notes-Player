@@ -69,15 +69,22 @@ export function getAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)()
   }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume()
-  }
   if (!gainNode) {
     gainNode = audioContext.createGain()
     gainNode.gain.value = 2.5
     gainNode.connect(audioContext.destination)
   }
   return audioContext
+}
+
+/**
+ * Ensure the AudioContext is running (resumed). Must be awaited before playback.
+ */
+export async function ensureAudioReady() {
+  const ac = getAudioContext()
+  if (ac.state === 'suspended') {
+    await ac.resume()
+  }
 }
 
 /**
