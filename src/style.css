@@ -322,7 +322,9 @@ body {
   scroll-behavior: smooth;
 }
 
-.notes-preview.collapsed {
+.notes-preview.collapsed,
+.notes-preview.hidden,
+.preview-divider.hidden {
   display: none;
 }
 

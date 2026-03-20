@@ -75,17 +75,17 @@
         </div>
         <textarea
           id="notes-input"
-          placeholder="Enter MIDI numbers (0-127), note names (C4, Eb5, F#3), or solfège (do, ré, sol#, solb3)&#10;Octave is optional (defaults to 4). Use any separator.&#10;&#10;Example: 60, 64, 67  or  C4 E4 G4  or  do mi sol"
+          placeholder="Enter MIDI numbers (0-127), note names (C4, Eb5, F#3), or solfège (do, ré, sol#, solb3). Octave is optional (defaults to 4). Use any separator. Example: 60, 64, 67  or  C4 E4 G4  or  do mi sol"
           spellcheck="false"
         ></textarea>
-        <div class="preview-divider">
+        <div class="preview-divider hidden">
           <div class="preview-divider-line"></div>
           <button id="toggle-preview-btn" class="btn-toggle-preview">
             <span class="toggle-arrow">&#9662;</span> Resolved
           </button>
           <div class="preview-divider-line"></div>
         </div>
-        <div id="notes-preview" class="notes-preview"></div>
+        <div id="notes-preview" class="notes-preview hidden"></div>
       </section>
 
       <!-- Playback Controls -->
@@ -96,7 +96,7 @@
             Tempo
             <span id="tempo-value" class="tempo-value">120 BPM</span>
           </label>
-          <input type="range" id="tempo-slider" min="40" max="500" value="120" />
+          <input type="range" id="tempo-slider" min="40" max="800" value="120" />
         </div>
 
         <div class="duration-control">
@@ -109,12 +109,12 @@
         </div>
 
         <div class="duration-control">
-          <label class="control-label" for="spacing-slider">
-            <span class="label-icon">&#8943;</span>
-            Note Spacing
-            <span id="spacing-value" class="tempo-value">0.00s</span>
+          <label class="control-label" for="volume-slider">
+            <span class="label-icon">&#9836;</span>
+            Volume
+            <span id="volume-value" class="tempo-value">100%</span>
           </label>
-          <input type="range" id="spacing-slider" min="0" max="1" value="0" step="0.01" />
+          <input type="range" id="volume-slider" min="0" max="200" value="100" step="1" />
         </div>
 
         <div class="transport-controls">

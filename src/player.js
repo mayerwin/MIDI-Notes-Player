@@ -78,6 +78,16 @@ export function getAudioContext() {
 }
 
 /**
+ * Set the master volume (gain).
+ * @param {number} percent - Volume as a percentage (0-200). 100% corresponds to the default gain of 2.5.
+ */
+export function setVolume(percent) {
+  if (gainNode) {
+    gainNode.gain.value = 2.5 * (percent / 100)
+  }
+}
+
+/**
  * Ensure the AudioContext is running (resumed). Must be awaited before playback.
  */
 export async function ensureAudioReady() {

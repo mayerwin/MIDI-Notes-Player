@@ -2,7 +2,7 @@
  * MIDI Notes Player — Main Application
  */
 import { parseNotes, midiToNoteName, midiToNoteNotation, midiToSolfegeNotation } from './midi-parser.js'
-import { INSTRUMENTS, loadInstrument, playNote, stopAll, getAudioContext, ensureAudioReady } from './player.js'
+import { INSTRUMENTS, loadInstrument, playNote, stopAll, getAudioContext, ensureAudioReady, setVolume } from './player.js'
 
 // Für Elise opening theme (MIDI numbers)
 const FUR_ELISE = '76, 75, 76, 75, 76, 71, 74, 72, 69, 60, 64, 69, 71, 64, 68, 71, 72, 64, 76, 75, 76, 75, 76, 71, 74, 72, 69, 60, 64, 69, 71, 64, 72, 71, 69'
@@ -22,12 +22,13 @@ const convertBtn = document.getElementById('convert-btn')
 const convertMenu = document.getElementById('convert-menu')
 const copyBtn = document.getElementById('copy-btn')
 const togglePreviewBtn = document.getElementById('toggle-preview-btn')
+const previewDivider = document.querySelector('.preview-divider')
 const tempoSlider = document.getElementById('tempo-slider')
 const tempoValue = document.getElementById('tempo-value')
 const durationSlider = document.getElementById('duration-slider')
 const durationValue = document.getElementById('duration-value')
-const spacingSlider = document.getElementById('spacing-slider')
-const spacingValue = document.getElementById('spacing-value')
+const volumeSlider = document.getElementById('volume-slider')
+const volumeValue = document.getElementById('volume-value')
 const nowPlaying = document.getElementById('now-playing')
 const progressBar = document.getElementById('progress-bar')
 const currentNoteDisplay = document.getElementById('current-note-display')
@@ -78,7 +79,10 @@ function updatePreview() {
   currentTokens = tokens
   notesPreview.innerHTML = ''
 
-  if (tokens.length === 0) return
+  const hasNotes = tokens.length > 0
+  previewDivider.classList.toggle('hidden', !hasNotes)
+  notesPreview.classList.toggle('hidden', !hasNotes)
+  if (!hasNotes) return
 
   tokens.forEach((token, i) => {
     const el = document.createElement('span')
@@ -127,8 +131,8 @@ function getNoteDuration() {
   return parseFloat(durationSlider.value)
 }
 
-function getNoteSpacing() {
-  return parseFloat(spacingSlider.value) * 1000 // convert to ms
+function getVolume() {
+  return parseInt(volumeSlider.value, 10)
 }
 
 // Playback state for pause/resume
@@ -213,7 +217,7 @@ function playNext() {
   playNote(token.midi, getNoteDuration())
 
   playbackNoteIndex++
-  const interval = getTempoMs() + getNoteSpacing()
+  const interval = getTempoMs()
   playbackTimeout = setTimeout(playNext, interval)
 }
 
@@ -368,8 +372,9 @@ function updateDurationDisplay() {
   durationValue.textContent = `${parseFloat(durationSlider.value).toFixed(2)}s`
 }
 
-function updateSpacingDisplay() {
-  spacingValue.textContent = `${parseFloat(spacingSlider.value).toFixed(2)}s`
+function updateVolumeDisplay() {
+  volumeValue.textContent = `${getVolume()}%`
+  setVolume(getVolume())
 }
 
 // ─── Event Listeners ───────────────────────────────────────
@@ -418,7 +423,7 @@ togglePreviewBtn.addEventListener('click', () => {
 
 tempoSlider.addEventListener('input', updateTempoDisplay)
 durationSlider.addEventListener('input', updateDurationDisplay)
-spacingSlider.addEventListener('input', updateSpacingDisplay)
+volumeSlider.addEventListener('input', updateVolumeDisplay)
 
 // Keyboard shortcut: Space to play/stop (when not in textarea)
 document.addEventListener('keydown', (e) => {
