@@ -267,12 +267,41 @@ body {
 }
 
 /* Notes Preview (parsed tokens) */
+.preview-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-toggle-preview {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s;
+}
+
+.btn-toggle-preview:hover {
+  color: var(--accent);
+}
+
 .notes-preview {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   min-height: 2rem;
+  max-height: 200px;
+  overflow-y: auto;
   padding: 0.5rem 0;
+  scroll-behavior: smooth;
+}
+
+.notes-preview.collapsed {
+  display: none;
 }
 
 .note-token {

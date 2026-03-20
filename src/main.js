@@ -21,6 +21,7 @@ const clearBtn = document.getElementById('clear-btn')
 const convertBtn = document.getElementById('convert-btn')
 const convertMenu = document.getElementById('convert-menu')
 const copyBtn = document.getElementById('copy-btn')
+const togglePreviewBtn = document.getElementById('toggle-preview-btn')
 const tempoSlider = document.getElementById('tempo-slider')
 const tempoValue = document.getElementById('tempo-value')
 const durationSlider = document.getElementById('duration-slider')
@@ -258,8 +259,18 @@ function highlightToken(index) {
   const el = notesPreview.querySelector(`[data-index="${index}"]`)
   if (el) {
     el.classList.add('active')
-    // Scroll into view if needed
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    // Scroll within the preview container only (not the page)
+    const container = notesPreview
+    const elTop = el.offsetTop - container.offsetTop
+    const elBottom = elTop + el.offsetHeight
+    const scrollTop = container.scrollTop
+    const viewHeight = container.clientHeight
+
+    if (elTop < scrollTop) {
+      container.scrollTop = elTop
+    } else if (elBottom > scrollTop + viewHeight) {
+      container.scrollTop = elBottom - viewHeight
+    }
   }
 }
 
@@ -387,6 +398,11 @@ document.addEventListener('click', () => {
 })
 
 copyBtn.addEventListener('click', copyToClipboard)
+
+togglePreviewBtn.addEventListener('click', () => {
+  const collapsed = notesPreview.classList.toggle('collapsed')
+  togglePreviewBtn.textContent = collapsed ? 'Show' : 'Hide'
+})
 
 tempoSlider.addEventListener('input', updateTempoDisplay)
 durationSlider.addEventListener('input', updateDurationDisplay)

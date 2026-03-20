@@ -78,6 +78,10 @@
           placeholder="Enter MIDI numbers (0-127), note names (C4, Eb5, F#3), or solfège (do, ré, sol#, solb3)&#10;Octave is optional (defaults to 4). Use any separator.&#10;&#10;Example: 60, 64, 67  or  C4 E4 G4  or  do mi sol"
           spellcheck="false"
         ></textarea>
+        <div class="preview-toggle">
+          <span class="control-label" style="font-size:0.7rem">Parsed Notes</span>
+          <button id="toggle-preview-btn" class="btn-toggle-preview">Hide</button>
+        </div>
         <div id="notes-preview" class="notes-preview"></div>
       </section>
 
