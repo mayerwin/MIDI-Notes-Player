@@ -150,8 +150,21 @@ async function startPlayback() {
     return
   }
 
-  const validTokens = currentTokens.filter(t => t.valid)
-  if (validTokens.length === 0) return
+  // Determine tokens to play: selected text only, or all
+  const selStart = notesInput.selectionStart
+  const selEnd = notesInput.selectionEnd
+  const hasSelection = selStart !== selEnd
+
+  let tokensToPlay
+  if (hasSelection) {
+    // Filter to tokens that overlap with the selection range
+    tokensToPlay = currentTokens.filter(t =>
+      t.valid && t.start < selEnd && t.end > selStart
+    )
+  } else {
+    tokensToPlay = currentTokens.filter(t => t.valid)
+  }
+  if (tokensToPlay.length === 0) return
 
   // Ensure instrument is loaded
   if (!instrumentLoaded && !instrumentLoading) {
@@ -164,13 +177,11 @@ async function startPlayback() {
   setPlayingUI(true)
   nowPlaying.classList.remove('hidden')
 
-  playbackValidTokens = validTokens
+  playbackValidTokens = tokensToPlay
   playbackNoteIndex = 0
 
-  // Map valid tokens to their original indices for highlighting
-  playbackValidIndices = currentTokens
-    .map((t, i) => t.valid ? i : -1)
-    .filter(i => i !== -1)
+  // Map played tokens back to their original indices for preview highlighting
+  playbackValidIndices = tokensToPlay.map(t => currentTokens.indexOf(t))
 
   playNext()
 }
@@ -401,7 +412,7 @@ copyBtn.addEventListener('click', copyToClipboard)
 
 togglePreviewBtn.addEventListener('click', () => {
   const collapsed = notesPreview.classList.toggle('collapsed')
-  togglePreviewBtn.textContent = collapsed ? 'Show' : 'Hide'
+  togglePreviewBtn.classList.toggle('collapsed', collapsed)
 })
 
 tempoSlider.addEventListener('input', updateTempoDisplay)

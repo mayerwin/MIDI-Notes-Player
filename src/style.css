@@ -267,26 +267,32 @@ body {
 }
 
 /* Notes Preview (parsed tokens) */
-.preview-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .btn-toggle-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   background: none;
   border: none;
   color: var(--text-muted);
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   cursor: pointer;
-  padding: 0.2rem 0.4rem;
-  border-radius: var(--radius-sm);
+  padding: 0.15rem 0;
   transition: color 0.2s;
 }
 
 .btn-toggle-preview:hover {
   color: var(--accent);
+}
+
+.btn-toggle-preview .toggle-arrow {
+  display: inline-block;
+  font-size: 0.6rem;
+  transition: transform 0.2s var(--ease-out);
+}
+
+.btn-toggle-preview.collapsed .toggle-arrow {
+  transform: rotate(-90deg);
 }
 
 .notes-preview {
